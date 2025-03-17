@@ -1,3 +1,5 @@
+"use client"
+
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -5,11 +7,42 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
-import { GraduationCap, Building2, Shield } from "lucide-react"
+import { GraduationCap, Building2, Shield, Facebook, Github, ChromeIcon as Google } from "lucide-react"
 // Adicionar o botão de tema à página de login da universidade
 import { ThemeToggle } from "@/components/theme-toggle"
 
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+
+
 export default function UniversityLoginPage() {
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [error, setError] = useState("")
+  const router = useRouter()
+
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    const res = await fetch("/api/login/university", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      setError(data.error);
+      return;
+    }
+
+    alert("Login bem-sucedido!");
+    router.push("/dashboard/university"); // Redireciona para outra página
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <header className="w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -65,9 +98,10 @@ export default function UniversityLoginPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+              <form onSubmit={handleSubmit}>
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email Institucional</Label>
-                  <Input id="email" type="email" placeholder="admin@universidade.edu.br" />
+                  <Label htmlFor="email">Email Acadêmico</Label>
+                  <Input id="email" type="email" placeholder="seu.email@universidade.edu.br" value={email} onChange={(e) => setEmail(e.target.value)} />
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
@@ -76,7 +110,7 @@ export default function UniversityLoginPage() {
                       Esqueceu a senha?
                     </Link>
                   </div>
-                  <Input id="password" type="password" />
+                  <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
                 </div>
 
                 <div className="flex items-center space-x-2">
@@ -89,14 +123,34 @@ export default function UniversityLoginPage() {
                   </label>
                 </div>
 
-                <Button className="w-full" size="lg">
+                <Button className="w-full" size="lg" type="submit">
                   Entrar
                 </Button>
 
-                <div className="flex items-center justify-center gap-2 p-2 rounded-md bg-muted">
-                  <Shield className="h-4 w-4 text-muted-foreground" />
-                  <p className="text-xs text-muted-foreground">Acesso seguro com verificação em duas etapas</p>
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">Ou continue com</span>
+                  </div>
                 </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  <Button variant="outline" className="w-full">
+                    <Google className="h-4 w-4 mr-2" />
+                    Google
+                  </Button>
+                  <Button variant="outline" className="w-full">
+                    <Facebook className="h-4 w-4 mr-2" />
+                    Facebook
+                  </Button>
+                  <Button variant="outline" className="w-full">
+                    <Github className="h-4 w-4 mr-2" />
+                    Github
+                  </Button>
+                </div>
+                </form>
               </CardContent>
               <CardFooter className="flex flex-col space-y-2">
                 <div className="text-center text-sm">

@@ -1,3 +1,5 @@
+"use client"
+
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -9,7 +11,39 @@ import { GraduationCap, Facebook, Github, ChromeIcon as Google } from "lucide-re
 // Adicionar o botão de tema à página de login do estudante
 import { ThemeToggle } from "@/components/theme-toggle"
 
+
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+
+
+
 export default function StudentLoginPage() {
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [error, setError] = useState("")
+  const router = useRouter()
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    const res = await fetch("/api/login/student", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      setError(data.error);
+      return;
+    }
+
+    alert("Login bem-sucedido!");
+    router.push("/dashboard/student"); // Redireciona para outra página
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <header className="w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -58,9 +92,10 @@ export default function StudentLoginPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                <form onSubmit={handleSubmit}>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email Acadêmico</Label>
-                  <Input id="email" type="email" placeholder="seu.email@universidade.edu.br" />
+                  <Input id="email" type="email" placeholder="seu.email@universidade.edu.br" value={email} onChange={(e) => setEmail(e.target.value)} />
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
@@ -69,7 +104,7 @@ export default function StudentLoginPage() {
                       Esqueceu a senha?
                     </Link>
                   </div>
-                  <Input id="password" type="password" />
+                  <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
                 </div>
 
                 <div className="flex items-center space-x-2">
@@ -82,7 +117,7 @@ export default function StudentLoginPage() {
                   </label>
                 </div>
 
-                <Button className="w-full" size="lg">
+                <Button className="w-full" size="lg" type="submit">
                   Entrar
                 </Button>
 
@@ -109,6 +144,7 @@ export default function StudentLoginPage() {
                     Github
                   </Button>
                 </div>
+                </form>
               </CardContent>
               <CardFooter className="flex flex-col space-y-2">
                 <div className="text-center text-sm">
